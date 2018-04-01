@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './App.css'
-import BarChart from './components/BarChart'
+import Karnataka from './components/Karnataka'
 class App extends Component {
   render() {
     return (
@@ -9,7 +9,7 @@ class App extends Component {
           <h2>Karnataka elections</h2>
         </div>
         <div>
-          <BarChart data={[5,10,1,3]} size={[500,500]} />
+          <Karnataka data={[5,10,1,3]} size={[500,500]} />
         </div>
       </div>
     )
