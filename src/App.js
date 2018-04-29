@@ -9,9 +9,9 @@ class App extends Component {
         <div className='App-header'>
           <h2>Karnataka elections</h2>
         </div>
-        <div style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row'}}>
+        <div style={{flex: 1, justifyContent: 'space-between', flexDirection: 'row', display: 'flex', flexWrap: 'wrap'}}>
           <Karnataka data={[5,10,1,3]} size={[500,500]} />
-          <Constituency />
+          <Constituency size={[500,500]} />
         </div>
       </div>
     )

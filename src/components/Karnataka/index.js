@@ -43,7 +43,7 @@ class Karnataka extends Component {
 
   render() {
     return (
-      <div style={{display: 'inline-block', flex: 1, border: '1px black solid'}}>
+      <div style={{display: 'inline-block', flex: 1, border: '1px black solid', margin: 5}}>
         <svg ref={node => this.node = node}
              width={this.props.size[0]}
              height={this.props.size[0]}
