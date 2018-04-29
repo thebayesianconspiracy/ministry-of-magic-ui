@@ -1,12 +1,15 @@
 import React, { Component } from 'react'
 import Dimensions from 'react-dimensions'
+import { connect } from 'react-redux'
 
 import { geoPath, geoMercator } from 'd3-geo';
 import { scaleLinear } from 'd3-scale';
 import { max } from 'd3-array';
 import { select } from 'd3-selection';
-import geoJSONData from './data.json';
 import d3Transition from 'd3-transition';
+
+import geoJSONData from './data.json';
+import { setConstituency } from '../../actions/constituency';
 
 const topojson = require('topojson');
 
@@ -38,12 +41,14 @@ class Karnataka extends Component {
       let y = height / 2;
       let k = 1;
 
-      console.log(d, centered);
+      const { properties } = d;
+
+      this.props.dispatch(setConstituency({ properties }));
+
       if (d && centered !== d) {
         let centroid = path.centroid(d);
         x = centroid[0];
         y = centroid[1];
-        console.log('x and y are', x, y);
         k = 7;
         centered = d;
       } else {
@@ -59,10 +64,6 @@ class Karnataka extends Component {
          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
          .style("stroke-width", 1.5 / k + "px");
       }
-    }
-
-    const clicked2 = function({ geometry, properties }) {
-      console.log('Clicked!', geometry, properties);
     }
     
     g.attr("class", "states")
@@ -90,4 +91,5 @@ class Karnataka extends Component {
     )
   }
 }
-export default Karnataka;
+
+export default connect()(Karnataka);
