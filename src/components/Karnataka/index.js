@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import Dimensions from 'react-dimensions'
 import { connect } from 'react-redux'
+import _ from 'lodash';
+import Dropdown from 'react-dropdown';
 
 import { geoPath, geoMercator } from 'd3-geo';
 import { scaleLinear } from 'd3-scale';
@@ -13,16 +15,24 @@ import { setConstituency } from '../../actions/constituency';
 
 const topojson = require('topojson');
 
+const dataMap = {};
+
 class Karnataka extends Component {
   constructor(props){
     super(props)
     this.createBarChart = this.createBarChart.bind(this)
+    this.state = {};
   }
   componentDidMount() {
     this.createBarChart()
   }
-  componentDidUpdate() {
-    this.createBarChart()
+
+  componentWillReceiveProps(nProps) {
+    const selected = nProps.constituency.get('selected');
+    const d = _.get(dataMap, selected);
+    if (d) {
+      this.clicked(d);
+    }
   }
   
   createBarChart() {
@@ -36,7 +46,7 @@ class Karnataka extends Component {
 
     let centered;
 
-    const clicked = (d) => {
+    this.clicked = (d) => {
       let x = width / 2;
       let y = height / 2;
       let k = 1;
@@ -55,10 +65,10 @@ class Karnataka extends Component {
         centered = null
       }
 
-      g.selectAll("path")
-       .classed("active", centered && function(d) { return d === centered; });
-
       if (centered) {
+        g.selectAll("path")
+         .classed("active", centered && function(d) { return d === centered; });
+        
         g.transition()
          .duration(750)
          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
@@ -71,16 +81,29 @@ class Karnataka extends Component {
      .selectAll("path")
      .data(topojson.feature(geoJSONData, geoJSONData.objects.karnataka).features)
      .enter().append("path").attr("class","constituencies")
-     .attr("id",function(d,i){
-       //console.log(d.properties);
-	return d.properties.AC_NAME;
+     .attr("id", function (d,i) {
+       return d.properties.AC_NAME
+     })
+     .each(function (ds) {
+       dataMap[_.get(ds, 'properties.AC_NAME')] = ds;
      })
      .attr("d", path)
-     .on("click", clicked);
+     .on("click", this.clicked);
+  }
+
+  _onSelect(cons) {
+    const d = _.get(dataMap, cons.value);
+    console.log(cons, d);
+    if (d) {
+      this.clicked(d);
+    }
   }
 
   render() {
+    const options = _.keys(dataMap);
     return (
+      <div>
+        <Dropdown options={options} onChange={this._onSelect.bind(this)} placeholder="Select an option" />
       <div style={{display: 'inline-block', flex: 1, border: '1px black solid', margin: 5}}>
         <svg ref={node => this.node = node}
              width={this.props.size[0]}
@@ -88,8 +111,13 @@ class Karnataka extends Component {
         >
         </svg>
       </div>
+      </div>
     )
   }
 }
 
-export default connect()(Karnataka);
+const mapStateToProps = ({ constituency }) => ({
+  constituency
+});
+
+export default connect(mapStateToProps)(Karnataka);
