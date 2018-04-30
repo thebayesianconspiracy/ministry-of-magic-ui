@@ -28,9 +28,10 @@ class Karnataka extends Component {
   }
 
   componentWillReceiveProps(nProps) {
-    const selected = nProps.constituency.get('selected');
-    const d = _.get(dataMap, selected);
-    if (d) {
+    const newName = nProps.constituency.get('name');
+    const currentName = this.props.constituency.get('name');
+    if (newName !== currentName) {
+      const d = _.get(dataMap, newName);
       this.clicked(d);
     }
   }
@@ -46,14 +47,16 @@ class Karnataka extends Component {
 
     let centered;
 
+    this.itemClicked = (d) => {
+      const { properties } = d;
+
+      this.props.dispatch(setConstituency({ properties }));
+    }
+
     this.clicked = (d) => {
       let x = width / 2;
       let y = height / 2;
       let k = 1;
-
-      const { properties } = d;
-
-      this.props.dispatch(setConstituency({ properties }));
 
       if (d && centered !== d) {
         let centroid = path.centroid(d);
@@ -75,11 +78,15 @@ class Karnataka extends Component {
          .style("stroke-width", 1.5 / k + "px");
       }
     }
+
+    const features = topojson.feature(geoJSONData, geoJSONData.objects.karnataka).features;
+
+    console.log('Features are', features);
     
     g.attr("class", "states")
      .attr("transform","translate(-4200,750)")
      .selectAll("path")
-     .data(topojson.feature(geoJSONData, geoJSONData.objects.karnataka).features)
+     .data(features)
      .enter().append("path").attr("class","constituencies")
      .attr("id", function (d,i) {
        return d.properties.AC_NAME
@@ -88,7 +95,7 @@ class Karnataka extends Component {
        dataMap[_.get(ds, 'properties.AC_NAME')] = ds;
      })
      .attr("d", path)
-     .on("click", this.clicked);
+     .on("click", this.itemClicked);
   }
 
   _onSelect(cons) {
@@ -103,7 +110,7 @@ class Karnataka extends Component {
     const options = _.keys(dataMap);
     return (
       <div>
-        <Dropdown options={options} onChange={this._onSelect.bind(this)} placeholder="Select an option" />
+        <Dropdown options={options} onChange={this._onSelect.bind(this)} placeholder="Select an option" value={this.props.constituency.get('selected')} />
       <div style={{display: 'inline-block', flex: 1, border: '1px black solid', margin: 5}}>
         <svg ref={node => this.node = node}
              width={this.props.size[0]}
